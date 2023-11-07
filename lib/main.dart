@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:inxpecta/features/authentication/sign_up.dart';
+import 'package:provider/provider.dart';
+import 'package:inxpecta/features/authentication/providers/auth_provider.dart';
+import 'package:inxpecta/features/authentication/widgets/sign_up.dart';
+import 'package:inxpecta/features/home/home_screen.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthStateProvider()), // Provide the AuthStateProvider
+      ],
+      child: const MyApp(),
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,52 +27,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.amberAccent),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'inXpecta'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-
-        title: Text(widget.title),
-      ),
-      body: SizedBox.expand(
-        child: Container(
-          child: const Center(
-            child: SignUpForm(),
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        label: const Text("Sign in"),
-      ), 
+      home: const MyHomePage(title: "InXpecta"),
     );
   }
 }

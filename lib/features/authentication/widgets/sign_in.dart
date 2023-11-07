@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class SignUpForm extends StatelessWidget {
-  const SignUpForm({super.key});
+class SignInForm extends StatelessWidget {
+  const SignInForm({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,9 +11,6 @@ class SignUpForm extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          TextFormField(
-            decoration: const InputDecoration(labelText: 'Username'),
-          ),
           const SizedBox(height: 16.0),
           TextFormField(
             decoration: const InputDecoration(labelText: 'Email'),
@@ -26,9 +23,9 @@ class SignUpForm extends StatelessWidget {
           const SizedBox(height: 16.0),
           ElevatedButton(
             onPressed: () {
-              // Add your form submission logic here
+              
             },
-            child: const Text('Sign Up'),
+            child: const Text('Sign in'),
           ),
         ],
       ),
