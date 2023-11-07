@@ -1,6 +1,6 @@
 # inxpecta
 
-InXpecta encompasses a comprehensive web application specifically designed to address the issue of online content ambiguity. It provides features aimed at enhancing digital literacy and fact-checking capabilities among users, effectively reducing the distribution and consumption of unreliable information.
+A new Flutter project.
 
 ## Getting Started
 
