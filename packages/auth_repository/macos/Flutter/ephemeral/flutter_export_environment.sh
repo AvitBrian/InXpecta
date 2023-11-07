@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\src\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\Users\Kira\Documents\code\inXpecta\packages\auth_repository"
+export "FLUTTER_ROOT=/Users/macbook/Applications/Dev/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/macbook/Downloads/Dev/Avit/inxpecta/packages/auth_repository"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=0.0.1"

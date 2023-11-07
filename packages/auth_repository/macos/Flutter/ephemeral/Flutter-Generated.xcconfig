@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=C:\src\flutter
-FLUTTER_APPLICATION_PATH=C:\Users\Kira\Documents\code\inXpecta\packages\auth_repository
+FLUTTER_ROOT=/Users/macbook/Applications/Dev/flutter
+FLUTTER_APPLICATION_PATH=/Users/macbook/Downloads/Dev/Avit/inxpecta/packages/auth_repository
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=0.0.1
