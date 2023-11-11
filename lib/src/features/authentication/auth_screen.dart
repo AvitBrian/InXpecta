@@ -19,9 +19,6 @@ class AuthScreen extends StatelessWidget {
 
     final authStateProvider = Provider.of<AuthStateProvider>(context);
 
-    void toggleAuthState() {
-      authStateProvider.toggleAuthState();
-    }
 
     return Scaffold(
       backgroundColor: MyConstants.backgroundColor,
@@ -35,7 +32,7 @@ class AuthScreen extends StatelessWidget {
                 child: SizedBox(
                   width: MyConstants.screenWidth(context),
                   child: SingleChildScrollView(
-                    child: authStateProvider.authState ? const SignInForm() : const SignUpForm(), 
+                    child: authStateProvider.signedState ? const SignInForm() : const SignUpForm(), 
                 ))),
             Expanded(
               child: Container(
@@ -46,7 +43,7 @@ class AuthScreen extends StatelessWidget {
                   children: [
                     const Text("Not a Member?"),
                     TextButton(
-                      onPressed: toggleAuthState,
+                      onPressed: authStateProvider.toggleSigned,
                       style: ButtonStyle(
                         overlayColor:
                             MaterialStateProperty.all(Colors.transparent),
@@ -59,7 +56,7 @@ class AuthScreen extends StatelessWidget {
                   children: [
                     const Text("Already a member?"),
                     TextButton(
-                      onPressed: toggleAuthState,
+                      onPressed: authStateProvider.toggleSigned,
                       style: ButtonStyle(
                         overlayColor:
                             MaterialStateProperty.all(Colors.transparent),

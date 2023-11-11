@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:inxpecta/src/features/authentication/components/button.dart';
 import 'package:inxpecta/src/features/authentication/components/container.dart';
+import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
 import 'package:inxpecta/src/utils/constants.dart';
 import 'package:lottie/lottie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import '../components/textfield.dart';
 
 class SignInForm extends StatefulWidget {
@@ -17,17 +19,22 @@ class _SignInFormState extends State<SignInForm>
     with SingleTickerProviderStateMixin {
   //variables
   bool isLoggedIn = false;
-
+  
   //controllers here!
   late final AnimationController _controller;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+   late AuthStateProvider authStateProvider;
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this);
+    authStateProvider = Provider.of<AuthStateProvider>(context, listen: false);
+    print(authStateProvider.authState);
+
   }
 
   @override
@@ -38,26 +45,29 @@ class _SignInFormState extends State<SignInForm>
     _controller.dispose();
   }
 
-Future<void> signInWithEmailAndPassword() async {
-  String email = emailController.text.trim();
-  String password = passwordController.text.trim();
+  Future<void> signInWithEmailAndPassword() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
 
-  print('Email: $email');
-  print('Password: $password');
-  try {
-    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    
-    print('User signed in: ${userCredential.user?.uid}');
-    // Navigate to the next screen or perform any other action on successful sign-in
-  } catch (e) {
-    print('Error signing in: $e');
-    // Handle the error, show a snackbar, or display an error message
+    print('Email: $email');
+    print('Password: $password');
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      print('User signed in: ${userCredential.user?.uid}');
+      // logged in logic
+      // Call toggleAuthState from AuthStateProvider
+      authStateProvider.toggleAuthState();
+      print(authStateProvider.authState);
+
+    } catch (e) {
+      print('Error signing in: $e');
+      // Handle the error, show a snackbar, or display an error message
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
