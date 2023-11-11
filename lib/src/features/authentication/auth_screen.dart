@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
 import 'package:inxpecta/src/features/authentication/widgets/sign_in.dart';
+// import 'package:inxpecta/src/features/authentication/widgets/sign_in.dart';
 import 'package:inxpecta/src/features/authentication/widgets/sign_up.dart';
 import 'package:inxpecta/src/utils/constants.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +12,7 @@ class AuthScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
     ));
@@ -25,14 +26,54 @@ class AuthScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: MyConstants.backgroundColor,
       body: SafeArea(
-        child: authStateProvider.authState
-            ? const SignUpForm()
-            : const SignInForm(),
+        child: SizedBox(
+          height: MyConstants.screenHeight(context),
+          width: MyConstants.screenWidth(context),
+          child: Column(children: [
+            Expanded(
+                flex: 10,
+                child: SizedBox(
+                  width: MyConstants.screenWidth(context),
+                  child: SingleChildScrollView(
+                    child: authStateProvider.authState ? const SignInForm() : const SignUpForm(), 
+                ))),
+            Expanded(
+              child: Container(
+                alignment: Alignment.bottomCenter,
+                width: MyConstants.screenWidth(context),
+                child: authStateProvider.authState ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Not a Member?"),
+                    TextButton(
+                      onPressed: toggleAuthState,
+                      style: ButtonStyle(
+                        overlayColor:
+                            MaterialStateProperty.all(Colors.transparent),
+                      ),
+                      child: const Text("Register"),
+                    )
+                  ],
+                ) : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Already a member?"),
+                    TextButton(
+                      onPressed: toggleAuthState,
+                      style: ButtonStyle(
+                        overlayColor:
+                            MaterialStateProperty.all(Colors.transparent),
+                      ),
+                      child: const Text("Log in!"),
+                    )
+                  ],
+                ),
+              ),
+            )
+          ]),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: toggleAuthState,
-        child: const Icon(Icons.swap_horiz),
-      ),
+      
     );
   }
 }

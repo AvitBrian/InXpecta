@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 class AuthStateProvider extends ChangeNotifier {
-  bool _authState = true;
+  bool _isLoggedIn = false;
 
-  bool get authState => _authState;
+  bool get authState => _isLoggedIn;
 
   void toggleAuthState() {
-    _authState = !_authState;
+    _isLoggedIn = !_isLoggedIn;
     notifyListeners();
   }
 }

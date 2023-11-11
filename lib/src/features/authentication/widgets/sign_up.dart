@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inxpecta/src/features/authentication/components/button.dart';
 import 'package:inxpecta/src/utils/constants.dart';
+import 'package:lottie/lottie.dart';
 
 import '../components/textfield.dart';
 
@@ -44,7 +45,7 @@ class _SignUpFormState extends State<SignUpForm>
                 padding: const EdgeInsets.symmetric(horizontal: 6.0),
                 child: Row(
                   children: [
-                    Text("Welcome to", style: TextStyle(fontSize: 20)),
+                    const Text("Welcome to", style: TextStyle(fontSize: 20)),
                     const SizedBox(
                       width: 4,
                     ),
@@ -56,8 +57,8 @@ class _SignUpFormState extends State<SignUpForm>
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6.0),
                 child: Row(
                   children: [
                     Text(
@@ -104,6 +105,14 @@ class _SignUpFormState extends State<SignUpForm>
                   }
                 },
               ),
+              SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: Lottie.asset('assets/animations/form.json',
+                         animate: true, fit: BoxFit.fill),
+                  )),
+
             ],
           ),
         ),

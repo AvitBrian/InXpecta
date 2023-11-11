@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "443516795908",
+    "project_id": "inxpecta-93c53",
+    "storage_bucket": "inxpecta-93c53.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:443516795908:android:518898812480faf2934951",
+        "android_client_info": {
+          "package_name": "com.example.inxpecta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzmpamnLge18I6Sz5wg0nzPVuXV6XwOBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
