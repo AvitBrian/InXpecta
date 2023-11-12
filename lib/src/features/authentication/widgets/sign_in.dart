@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:inxpecta/src/features/authentication/components/button.dart';
 import 'package:inxpecta/src/features/authentication/components/container.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
+import 'package:inxpecta/src/features/authentication/providers/google_sign_in.dart';
 import 'package:inxpecta/src/utils/constants.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -145,14 +146,17 @@ class _SignInFormState extends State<SignInForm>
           const SizedBox(
             height: 16,
           ),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              MyContainer(
-                image: "assets/images/google.png",
-                height: 50,
-                width: 50,
-                color: Colors.white,
+              GestureDetector(
+                onTap: signInWithGoogle,
+                child: MyContainer(
+                  image: "assets/images/google.png",
+                  height: 50,
+                  width: 50,
+                  color: Colors.white,
+                ),
               ),
               SizedBox(
                 width: 8,

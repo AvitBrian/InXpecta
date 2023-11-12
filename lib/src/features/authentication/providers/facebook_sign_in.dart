@@ -3,7 +3,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 Future<UserCredential> signInWithFacebook() async {
   // Trigger the sign-in flow
-  final LoginResult? loginResult = await FacebookAuth.instance.login();
+  final LoginResult loginResult = await FacebookAuth.instance.login();
 
   if (loginResult != null) {
     // Check if accessToken is not null before accessing its properties
