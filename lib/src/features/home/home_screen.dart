@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: authStateProvider.authState
                 ? Column(
                     children: [
-                      Text("Welcome, ${user?.displayName}"),
+                      Text("Welcome, ${user?.email}, $user"),
                       MyButton(
                         onTap: () {
                           context.read<AuthStateProvider>().signOut();

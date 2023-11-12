@@ -19,7 +19,6 @@ class AuthScreen extends StatelessWidget {
 
     final authStateProvider = Provider.of<AuthStateProvider>(context);
 
-
     return Scaffold(
       backgroundColor: MyConstants.backgroundColor,
       body: SafeArea(
@@ -30,47 +29,50 @@ class AuthScreen extends StatelessWidget {
             Expanded(
                 flex: 10,
                 child: SizedBox(
-                  width: MyConstants.screenWidth(context),
-                  child: SingleChildScrollView(
-                    child: authStateProvider.signedState ? const SignInForm() : const SignUpForm(), 
-                ))),
+                    width: MyConstants.screenWidth(context),
+                    child: SingleChildScrollView(
+                      child: authStateProvider.signedState
+                          ? const SignInForm()
+                          : const SignUpForm(),
+                    ))),
             Expanded(
               child: Container(
                 alignment: Alignment.bottomCenter,
                 width: MyConstants.screenWidth(context),
-                child: authStateProvider.authState ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Not a Member?"),
-                    TextButton(
-                      onPressed: authStateProvider.toggleSigned,
-                      style: ButtonStyle(
-                        overlayColor:
-                            MaterialStateProperty.all(Colors.transparent),
+                child: authStateProvider.signedState
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Not a Member?"),
+                          TextButton(
+                            onPressed: authStateProvider.toggleSigned,
+                            style: ButtonStyle(
+                              overlayColor:
+                                  MaterialStateProperty.all(Colors.transparent),
+                            ),
+                            child: const Text("Register"),
+                          )
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Already a member?"),
+                          TextButton(
+                            onPressed: authStateProvider.toggleSigned,
+                            style: ButtonStyle(
+                              overlayColor:
+                                  MaterialStateProperty.all(Colors.transparent),
+                            ),
+                            child: const Text("Log in!"),
+                          )
+                        ],
                       ),
-                      child: const Text("Register"),
-                    )
-                  ],
-                ) : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Already a member?"),
-                    TextButton(
-                      onPressed: authStateProvider.toggleSigned,
-                      style: ButtonStyle(
-                        overlayColor:
-                            MaterialStateProperty.all(Colors.transparent),
-                      ),
-                      child: const Text("Log in!"),
-                    )
-                  ],
-                ),
               ),
             )
           ]),
         ),
       ),
-      
     );
   }
 }

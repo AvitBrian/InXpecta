@@ -58,7 +58,9 @@ class _SignInFormState extends State<SignInForm>
 
       print('User signed in: ${userCredential.user?.uid}');
       // logged in logic
-      context.read<AuthStateProvider>().toggleAuthState(userCredential.user);
+      Future.delayed(Duration.zero, () {
+        context.read<AuthStateProvider>().toggleAuthState(userCredential.user);
+      });
     } catch (e) {
       print('Error signing in: $e');
       // Handle the error, show a snackbar, or display an error message

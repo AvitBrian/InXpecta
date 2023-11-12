@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:inxpecta/src/features/authentication/components/button.dart';
+import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
 import 'package:inxpecta/src/utils/constants.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 
 import '../components/textfield.dart';
 
@@ -40,7 +42,6 @@ class _SignUpFormState extends State<SignUpForm>
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     String username = _usernameController.text.trim();
-    _updateUserProfile(_auth.currentUser, username);
 
     try {
       UserCredential userCredential =
@@ -51,24 +52,24 @@ class _SignUpFormState extends State<SignUpForm>
 
       // You can handle the newly created user here (e.g., save additional data to Firestore)
       User? user = userCredential.user;
-      print('User signed up: ${user?.uid}');
+      if (user != null) {
+        await user.updateDisplayName(username);
+        await user.reload();
+        user = _auth.currentUser;
+      }
+      Future.delayed(Duration.zero, () {
+        context.read<AuthStateProvider>().toggleAuthState(userCredential.user);
+      });
+
+      // print('User signed up: ${user?.uid}');
     } catch (e) {
       print('Error signing up: $e');
       // Handle the error, show a snackbar, or display an error message
     }
   }
 
-  Future<void> _updateUserProfile(User? user, String username) async {
-    if (user != null) {
-      await user.updateDisplayName(username);
-      await user.reload();
-      user = _auth.currentUser; // Refresh user data
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    double width = MyConstants.screenWidth(context);
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: SizedBox(
