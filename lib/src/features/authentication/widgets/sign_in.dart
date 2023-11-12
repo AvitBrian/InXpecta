@@ -35,7 +35,6 @@ class _SignInFormState extends State<SignInForm>
     super.initState();
     _controller = AnimationController(vsync: this);
     authStateProvider = Provider.of<AuthStateProvider>(context, listen: false);
-    print(authStateProvider.authState);
   }
 
   @override

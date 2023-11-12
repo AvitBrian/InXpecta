@@ -20,9 +20,7 @@ class _SignUpFormState extends State<SignUpForm>
   late final AnimationController _controller;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _namesController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -52,13 +50,12 @@ class _SignUpFormState extends State<SignUpForm>
 
       // You can handle the newly created user here (e.g., save additional data to Firestore)
       User? user = userCredential.user;
-      if (user != null) {
-        await user.updateDisplayName(username);
-        await user.reload();
-        user = _auth.currentUser;
-      }
+      await user!.updateDisplayName(username);
+      await user.reload();
+      user = _auth.currentUser;
+
       Future.delayed(Duration.zero, () {
-        context.read<AuthStateProvider>().toggleAuthState(userCredential.user);
+        context.read<AuthStateProvider>().toggleAuthState(user);
       });
 
       // print('User signed up: ${user?.uid}');
@@ -109,10 +106,6 @@ class _SignUpFormState extends State<SignUpForm>
               const SizedBox(
                 height: 8,
               ),
-              MyTextField(
-                hintText: "Names",
-                controller: _namesController,
-              ),
               const SizedBox(height: 8.0),
               MyTextField(
                 hintText: "Username",
@@ -131,11 +124,6 @@ class _SignUpFormState extends State<SignUpForm>
                 controller: _passwordController,
               ),
               const SizedBox(height: 8.0),
-              MyTextField(
-                hintText: "Phone",
-                obscureText: false,
-                controller: _phoneController,
-              ),
               const SizedBox(height: 8.0),
               MyButton(
                 label: "Sign Up",

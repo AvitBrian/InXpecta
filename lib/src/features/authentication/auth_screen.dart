@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
 import 'package:inxpecta/src/features/authentication/widgets/sign_in.dart';
 // import 'package:inxpecta/src/features/authentication/widgets/sign_in.dart';
@@ -11,6 +12,12 @@ class AuthScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: MyConstants.backgroundColor,
+      systemNavigationBarColor: MyConstants.backgroundColor,
+      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.dark,
+    ));
     final authStateProvider = Provider.of<AuthStateProvider>(context);
 
     return Scaffold(
