@@ -135,7 +135,7 @@ class AuthStateProvider extends ChangeNotifier {
           idToken: googleAuth.idToken,
         );
 
-        // Once signed in, return the UserCredential
+        // Once signed in, return the UserCredential here
         // UserCredential userCredential =
         //     await _auth.signInWithCredential(credential);
         User userDetails = (await _auth.signInWithCredential(credential)).user!;
