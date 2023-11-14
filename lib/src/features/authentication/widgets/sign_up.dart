@@ -55,7 +55,7 @@ class _SignUpFormState extends State<SignUpForm>
       user = _auth.currentUser;
 
       Future.delayed(Duration.zero, () {
-        context.read<AuthStateProvider>().toggleAuthState(user);
+        context.read<AuthStateProvider>().setAuthState();
       });
 
       // print('User signed up: ${user?.uid}');

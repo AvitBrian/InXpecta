@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:inxpecta/src/features/authentication/components/button.dart';
 import 'package:inxpecta/src/features/authentication/components/container.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
-import 'package:inxpecta/src/features/authentication/providers/google_sign_in.dart';
+import 'package:inxpecta/src/features/authentication/providers/connection_provider.dart';
+import 'package:inxpecta/src/screens/home_screen.dart';
 import 'package:inxpecta/src/utils/constants.dart';
+import 'package:inxpecta/src/utils/next_screen.dart';
+import 'package:inxpecta/src/utils/snack_bar.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
@@ -29,13 +32,10 @@ class _SignInFormState extends State<SignInForm>
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  late AuthStateProvider authStateProvider;
-
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this);
-    authStateProvider = Provider.of<AuthStateProvider>(context, listen: false);
   }
 
   @override
@@ -59,7 +59,7 @@ class _SignInFormState extends State<SignInForm>
       print('User signed in: ${userCredential.user?.uid}');
       // logged in logic
       Future.delayed(Duration.zero, () {
-        context.read<AuthStateProvider>().toggleAuthState(userCredential.user);
+        context.read<AuthStateProvider>().setAuthState();
       });
     } catch (e) {
       print('Error signing in: $e');
@@ -79,6 +79,7 @@ class _SignInFormState extends State<SignInForm>
               child: Lottie.asset('assets/animations/lock3.json',
                   controller: _controller, onLoaded: (composition) {
                 _controller.duration = composition.duration;
+                _controller.forward();
               }, height: 100, animate: true, fit: BoxFit.fitWidth)),
           const SizedBox(
             height: 8,
@@ -112,10 +113,7 @@ class _SignInFormState extends State<SignInForm>
           ),
           MyButton(
             label: "Sign In",
-            onTap: () {
-              authStateProvider.signInWithEmailAndPassword(
-                  emailController.text.trim(), passwordController.text.trim());
-            },
+            onTap: handleEmailAndPasswordSignIn,
           ),
           const SizedBox(
             height: 16,
@@ -150,27 +148,113 @@ class _SignInFormState extends State<SignInForm>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: signInWithGoogle,
-                child: MyContainer(
+                onTap: handleGoogleSignIn,
+                child: const MyContainer(
                   image: "assets/images/google.png",
                   height: 50,
                   width: 50,
                   color: Colors.white,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 8,
               ),
-              MyContainer(
-                image: "assets/images/facebook.png",
-                height: 50,
-                width: 50,
-                color: Colors.white,
+              GestureDetector(
+                onTap: handleFaceBookSignIn,
+                child: const MyContainer(
+                  image: "assets/images/facebook.png",
+                  height: 50,
+                  width: 50,
+                  color: Colors.white,
+                ),
               )
             ],
           ),
         ],
       ),
     );
+  }
+
+  Future handleGoogleSignIn() async {
+    final authP = context.read<AuthStateProvider>();
+    final connP = context.read<ConnectionProvider>();
+
+    if (connP.hasInternet == false) {
+      openSnackBar(context, "No internet :(", MyConstants.primaryColor);
+    } else {
+      await authP.signInWithGoogle().then((value) {
+        if (authP.hasError) {
+          openSnackBar(context, authP.errorCode, Colors.deepOrange);
+        } else {
+          authP.checkUserExists().then((value) async {
+            if (value == false) {
+              authP.saveDataToFireStore().then((value) => authP
+                      .saveDataToSharedPreferences()
+                      .then((value) => authP.setAuthState())
+                      .then((value) {
+                    handleAfterLogin();
+                  }));
+            } else {
+              authP.getUserDataFromFireStore().then((value) =>
+                  authP.setAuthState().then((value) => handleAfterLogin));
+            }
+          });
+        }
+      });
+    }
+  }
+
+  Future handleEmailAndPasswordSignIn() async {
+    final authP = context.read<AuthStateProvider>();
+    final connP = context.read<ConnectionProvider>();
+
+    if (connP.hasInternet == false) {
+      openSnackBar(context, "No internet :(", MyConstants.primaryColor);
+    } else {
+      await authP
+          .signInWithEmailAndPassword(
+              emailController.text.trim(), passwordController.text.trim())
+          .then((value) {
+        if (authP.hasError) {
+          openSnackBar(context, authP.errorCode, Colors.deepOrange);
+        } else {
+          handleAfterLogin();
+        }
+      });
+    }
+  }
+
+  Future handleFaceBookSignIn() async {
+    final authP = context.read<AuthStateProvider>();
+    final connP = context.read<ConnectionProvider>();
+
+    if (connP.hasInternet == false) {
+      openSnackBar(context, "No internet :(", MyConstants.primaryColor);
+    } else {
+      await authP.signInWithFacebook().then((value) {
+        if (authP.hasError) {
+          openSnackBar(context, authP.errorCode, Colors.deepOrange);
+        } else {
+          authP.checkUserExists().then((value) async {
+            if (value == false) {
+              authP.saveDataToFireStore().then((value) => authP
+                      .saveDataToSharedPreferences()
+                      .then((value) => authP.setAuthState())
+                      .then((value) {
+                    handleAfterLogin();
+                  }));
+            } else {
+              authP.getUserDataFromFireStore().then((value) =>
+                  authP.setAuthState().then((value) => handleAfterLogin));
+            }
+          });
+        }
+      });
+    }
+  }
+
+  handleAfterLogin() {
+    Future.delayed(const Duration(milliseconds: 1000))
+        .then((value) => {nextScreenReplacement(context, const MyHomePage())});
   }
 }
