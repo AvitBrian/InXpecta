@@ -1,33 +1,27 @@
-# InXpecta - Combating Online Ambiguity
+# React + TypeScript + Vite
 
-Welcome to InXpecta, a web application dedicated to enhancing digital literacy and reducing online content ambiguity.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
-- User Registration and Login
-- Educational Resources for Digital Literacy
-- Source Submission and Rating System
-- Community Discussions
+Currently, two official plugins are available:
 
-## Technologies Used
-This project is built using HTML, Tailwind CSS, and JavaScript to create a user-friendly and interactive website.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Data Privacy and Security
-Protecting user data is our top priority. InXpecta employs robust authentication methods and data encryption to ensure your information remains secure.
+## Expanding the ESLint configuration
 
-## Accessibility
-InXpecta is designed to be accessible on both desktop and mobile devices, providing a seamless experience for all users.
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-## Getting Started
-Follow these steps to set up and run InXpecta locally:
-1. Clone this repository to your local machine.
-2. Open the project in your preferred code editor.
-3. Launch the website by opening the HTML file in your browser.
+- Configure the top-level `parserOptions` property like this:
 
-## Contributing
-We welcome contributions from the community! Feel free to submit issues, suggest enhancements, or create pull requests to help make InXpecta even better.
+```js
+   parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: ['./tsconfig.json', './tsconfig.node.json'],
+    tsconfigRootDir: __dirname,
+   },
+```
 
-## License
-This project is licensed under AvitBrian - see the [LICENSE.md](LICENSE.md) file for details.
-
-## Contact
-If you have any questions or feedback, please don't hesitate to reach out to us at avit.mugisha@gmail.com.
+- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
+- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
