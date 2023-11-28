@@ -25,7 +25,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List _pages = [
     const SizedBox(child: StatsPage()),
     const SizedBox(child: Text("page 2")),
-    const SizedBox(child: Text("page 3")),
+    const SizedBox(child: Text("page last")),
   ];
   @override
   void initState() {
@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
           itemCount: _pages.length,
           controller: _pageController,
           itemBuilder: (BuildContext, currentIndex) {
-            return Container(child: Center(child: _pages[currentIndex]));
+            return Center(child: _pages[currentIndex]);
           },
           onPageChanged: (index) {
             setState(() {
