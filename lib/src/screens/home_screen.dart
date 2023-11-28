@@ -1,8 +1,9 @@
+import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:inxpecta/src/features/authentication/components/button.dart';
+import 'package:flutter/services.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
-import 'package:inxpecta/src/screens/auth_screen.dart';
-import 'package:inxpecta/src/utils/next_screen.dart';
+import 'package:inxpecta/src/features/home/stats_page.dart';
+import 'package:inxpecta/src/utils/constants.dart';
 import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -16,7 +17,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late AuthStateProvider authStateProvider;
+  int currentIndex = 1;
+  final PageController _pageController = PageController(initialPage: 1);
 
+  final NotchBottomBarController _NotchpageController =
+      NotchBottomBarController();
+  final List _pages = [
+    const SizedBox(child: StatsPage()),
+    const SizedBox(child: Text("page 2")),
+    const SizedBox(child: Text("page 3")),
+  ];
   @override
   void initState() {
     super.initState();
@@ -25,39 +35,56 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     authStateProvider = Provider.of<AuthStateProvider>(context, listen: true);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: MyConstants.navColor,
+      statusBarIconBrightness: Brightness.dark,
+    ));
     return Scaffold(
+      backgroundColor: MyConstants.backgroundColor,
       body: SafeArea(
-        child: SizedBox.expand(
-          child: Center(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    SizedBox(
-                      height: 50,
-                      width: 50,
-                      child: Image.network(
-                        "${authStateProvider.photoUrl}",
-                        height: 50,
-                        width: 50,
-                      ),
-                    ),
-                    Text(
-                      "Welcome, ${authStateProvider.name}",
-                    ),
-                  ],
-                ),
-                MyButton(
-                  onTap: () {
-                    context.read<AuthStateProvider>().signOut();
-                    nextScreenReplacement(context, const AuthScreen());
-                  },
-                  label: "Sign Out",
-                )
-              ],
-            ),
-          ),
+        child: PageView.builder(
+          itemCount: _pages.length,
+          controller: _pageController,
+          itemBuilder: (BuildContext, currentIndex) {
+            return Container(child: Center(child: _pages[currentIndex]));
+          },
+          onPageChanged: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        enableFeedback: true,
+        elevation: 10,
+        backgroundColor: MyConstants.navColor,
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+            _pageController.animateToPage(
+              index,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+            );
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            label: "Stats",
+            icon: Icon(Icons.bar_chart_outlined),
+          ),
+          BottomNavigationBarItem(
+            label: "Home",
+            icon: Icon(Icons.home_filled),
+          ),
+          BottomNavigationBarItem(
+            label: "Profile",
+            icon: Icon(Icons.account_circle),
+          ),
+        ],
       ),
     );
   }

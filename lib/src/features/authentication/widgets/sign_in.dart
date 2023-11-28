@@ -255,6 +255,6 @@ class _SignInFormState extends State<SignInForm>
 
   handleAfterLogin() {
     Future.delayed(const Duration(milliseconds: 1000))
-        .then((value) => {nextScreenReplacement(context, const MyHomePage())});
+        .then((value) => {nextScreen(context, const MyHomePage())});
   }
 }

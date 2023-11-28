@@ -17,6 +17,7 @@ class MyConstants {
 
   // Background color
   static Color backgroundColor = Colors.grey.shade500;
+  static Color navColor = Colors.grey.shade200;
   // text color
   static Color textColor = Colors.grey.shade600;
 }
