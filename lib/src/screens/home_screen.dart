@@ -2,6 +2,8 @@ import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_not
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
+import 'package:inxpecta/src/features/home/profile_page.dart';
+import 'package:inxpecta/src/features/home/report_page.dart';
 import 'package:inxpecta/src/features/home/stats_page.dart';
 import 'package:inxpecta/src/utils/constants.dart';
 import 'package:provider/provider.dart';
@@ -24,8 +26,8 @@ class _MyHomePageState extends State<MyHomePage> {
       NotchBottomBarController();
   final List _pages = [
     const SizedBox(child: StatsPage()),
-    const SizedBox(child: Text("page 2")),
-    const SizedBox(child: Text("page last")),
+    const SizedBox(child: ReportPage()),
+    const SizedBox(child: ProfilePage()),
   ];
   @override
   void initState() {
@@ -57,8 +59,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        unselectedItemColor: Colors.black45,
+        type: BottomNavigationBarType.fixed,
+        iconSize: 25,
         enableFeedback: true,
-        elevation: 10,
+        elevation: 30,
         backgroundColor: MyConstants.navColor,
         currentIndex: currentIndex,
         onTap: (index) {
@@ -66,8 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
             currentIndex = index;
             _pageController.animateToPage(
               index,
-              duration: Duration(milliseconds: 500),
-              curve: Curves.easeInOut,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.fastOutSlowIn,
             );
           });
         },
@@ -77,12 +82,12 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.bar_chart_outlined),
           ),
           BottomNavigationBarItem(
-            label: "Home",
-            icon: Icon(Icons.home_filled),
+            label: "Report",
+            icon: Icon(Icons.data_saver_off_rounded),
           ),
           BottomNavigationBarItem(
             label: "Profile",
-            icon: Icon(Icons.account_circle),
+            icon: Icon(Icons.account_circle_rounded),
           ),
         ],
       ),

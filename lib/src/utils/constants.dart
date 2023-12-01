@@ -10,10 +10,10 @@ class MyConstants {
       MediaQuery.of(context).size.height;
 
   // Primary color
-  static Color primaryColor = Colors.amberAccent;
+  static Color primaryColor = const Color(0xffe9d4a2);
 
   // Secondary color (teal)
-  static Color secondaryColor = Colors.white;
+  static Color secondaryColor = const Color(0xff543d07);
 
   // Background color
   static Color backgroundColor = Colors.grey.shade500;

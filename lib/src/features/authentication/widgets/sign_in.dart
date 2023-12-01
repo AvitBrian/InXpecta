@@ -24,6 +24,9 @@ class _SignInFormState extends State<SignInForm>
     with SingleTickerProviderStateMixin {
   //variables
   bool isLoggedIn = false;
+  bool _isLoadingGoogle = false;
+  bool _isLoadingFacebook = false;
+  bool _isLoading = false;
 
   //controllers here!
   late final AnimationController _controller;
@@ -69,6 +72,115 @@ class _SignInFormState extends State<SignInForm>
 
   @override
   Widget build(BuildContext context) {
+    final authP = context.read<AuthStateProvider>();
+    final connP = context.read<ConnectionProvider>();
+
+    Future handleGoogleSignIn() async {
+      setState(() {
+        _isLoadingGoogle = true;
+      });
+      if (connP.hasInternet == true) {
+        await authP.signInWithGoogle().then((value) {
+          if (authP.hasError) {
+            setState(() {
+              _isLoadingGoogle = false;
+            });
+            openSnackBar(context, authP.errorCode, Colors.deepOrange);
+          } else {
+            authP.checkUserExists().then((value) async {
+              if (value == false) {
+                authP.saveDataToFireStore().then((value) => authP
+                        .saveDataToSharedPreferences()
+                        .then((value) => authP.setAuthState())
+                        .then((value) {
+                      _isLoadingGoogle = false;
+                      handleAfterLogin();
+                    }));
+              } else {
+                authP
+                    .getUserDataFromFireStore()
+                    .then((value) => authP.setAuthState().then((value) {
+                          setState(() {
+                            _isLoadingGoogle = false;
+                          });
+                          handleAfterLogin();
+                        }));
+              }
+            });
+          }
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        openSnackBar(context, "No internet :(", MyConstants.primaryColor);
+      }
+    }
+
+    Future handleEmailAndPasswordSignIn() async {
+      if (connP.hasInternet == false) {
+        openSnackBar(context, "No internet :(", MyConstants.primaryColor);
+      } else {
+        await authP
+            .signInWithEmailAndPassword(
+                emailController.text.trim(), passwordController.text.trim())
+            .then((value) {
+          if (authP.hasError) {
+            openSnackBar(context, authP.errorCode, Colors.deepOrange);
+          } else {
+            setState(() {
+              _isLoading = false;
+            });
+            handleAfterLogin();
+          }
+        });
+      }
+    }
+
+    Future handleFaceBookSignIn() async {
+      setState(() {
+        _isLoadingFacebook = true;
+      });
+      if (connP.hasInternet == false) {
+        openSnackBar(context, "No internet :(", MyConstants.primaryColor);
+        setState(() {
+          _isLoadingFacebook = false;
+        });
+      } else {
+        await authP.signInWithFacebook().then((value) {
+          if (authP.hasError) {
+            setState(() {
+              _isLoadingFacebook = false;
+            });
+            openSnackBar(context, authP.errorCode, Colors.deepOrange);
+          } else {
+            authP.checkUserExists().then((value) async {
+              if (value == false) {
+                authP.saveDataToFireStore().then((value) => authP
+                        .saveDataToSharedPreferences()
+                        .then((value) => authP.setAuthState())
+                        .then((value) {
+                      setState(() {
+                        _isLoadingFacebook = false;
+                      });
+                      handleAfterLogin();
+                    }));
+              } else {
+                authP
+                    .getUserDataFromFireStore()
+                    .then((value) => authP.setAuthState().then((value) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          handleAfterLogin();
+                        }));
+              }
+            });
+          }
+        });
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -147,110 +259,82 @@ class _SignInFormState extends State<SignInForm>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              GestureDetector(
-                onTap: handleGoogleSignIn,
-                child: const MyContainer(
-                  image: "assets/images/google.png",
-                  height: 50,
-                  width: 50,
-                  color: Colors.white,
-                ),
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      handleGoogleSignIn();
+                    },
+                    child: const MyContainer(
+                      image: "assets/images/google.png",
+                      height: 50,
+                      width: 50,
+                      color: Colors.white,
+                    ),
+                  ),
+                  // Dark background
+                  Visibility(
+                    visible: _isLoadingGoogle,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                      height: 70,
+                      width: 70,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.amber,
+                          strokeWidth: 5,
+                        ),
+                      ),
+                    ),
+                  )
+                  // Loading circle
+                ],
               ),
               const SizedBox(
                 width: 8,
               ),
-              GestureDetector(
-                onTap: handleFaceBookSignIn,
-                child: const MyContainer(
-                  image: "assets/images/facebook.png",
-                  height: 50,
-                  width: 50,
-                  color: Colors.white,
-                ),
-              )
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      handleFaceBookSignIn();
+                    },
+                    child: const MyContainer(
+                      image: "assets/images/facebook.png",
+                      height: 50,
+                      width: 50,
+                      color: Colors.white,
+                    ),
+                  ),
+                  // Dark background
+                  Visibility(
+                    visible: _isLoadingFacebook,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.black.withOpacity(0.5),
+                      ),
+                      height: 70,
+                      width: 70,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.amber,
+                          strokeWidth: 5,
+                        ),
+                      ),
+                    ),
+                  )
+                  // Loading circle
+                ],
+              ),
             ],
           ),
         ],
       ),
     );
-  }
-
-  Future handleGoogleSignIn() async {
-    final authP = context.read<AuthStateProvider>();
-    final connP = context.read<ConnectionProvider>();
-
-    if (connP.hasInternet == false) {
-      openSnackBar(context, "No internet :(", MyConstants.primaryColor);
-    } else {
-      await authP.signInWithGoogle().then((value) {
-        if (authP.hasError) {
-          openSnackBar(context, authP.errorCode, Colors.deepOrange);
-        } else {
-          authP.checkUserExists().then((value) async {
-            if (value == false) {
-              authP.saveDataToFireStore().then((value) => authP
-                      .saveDataToSharedPreferences()
-                      .then((value) => authP.setAuthState())
-                      .then((value) {
-                    handleAfterLogin();
-                  }));
-            } else {
-              authP.getUserDataFromFireStore().then((value) =>
-                  authP.setAuthState().then((value) => handleAfterLogin));
-            }
-          });
-        }
-      });
-    }
-  }
-
-  Future handleEmailAndPasswordSignIn() async {
-    final authP = context.read<AuthStateProvider>();
-    final connP = context.read<ConnectionProvider>();
-
-    if (connP.hasInternet == false) {
-      openSnackBar(context, "No internet :(", MyConstants.primaryColor);
-    } else {
-      await authP
-          .signInWithEmailAndPassword(
-              emailController.text.trim(), passwordController.text.trim())
-          .then((value) {
-        if (authP.hasError) {
-          openSnackBar(context, authP.errorCode, Colors.deepOrange);
-        } else {
-          handleAfterLogin();
-        }
-      });
-    }
-  }
-
-  Future handleFaceBookSignIn() async {
-    final authP = context.read<AuthStateProvider>();
-    final connP = context.read<ConnectionProvider>();
-
-    if (connP.hasInternet == false) {
-      openSnackBar(context, "No internet :(", MyConstants.primaryColor);
-    } else {
-      await authP.signInWithFacebook().then((value) {
-        if (authP.hasError) {
-          openSnackBar(context, authP.errorCode, Colors.deepOrange);
-        } else {
-          authP.checkUserExists().then((value) async {
-            if (value == false) {
-              authP.saveDataToFireStore().then((value) => authP
-                      .saveDataToSharedPreferences()
-                      .then((value) => authP.setAuthState())
-                      .then((value) {
-                    handleAfterLogin();
-                  }));
-            } else {
-              authP.getUserDataFromFireStore().then((value) =>
-                  authP.setAuthState().then((value) => handleAfterLogin));
-            }
-          });
-        }
-      });
-    }
   }
 
   handleAfterLogin() {

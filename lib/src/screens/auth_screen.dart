@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
+  static bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
