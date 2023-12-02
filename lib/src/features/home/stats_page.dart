@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:inxpecta/src/charts/indicators.dart';
 import 'package:inxpecta/src/charts/pieChart.dart';
 import 'package:inxpecta/src/models/source_List_Model.dart';
 import 'package:inxpecta/src/models/source_model.dart';
+import 'package:inxpecta/src/utils/camel_case.dart';
 import 'package:inxpecta/src/utils/constants.dart';
 
 class StatsPage extends StatefulWidget {
@@ -14,15 +14,22 @@ class StatsPage extends StatefulWidget {
   State<StatsPage> createState() => _StatsPageState();
 }
 
-class _StatsPageState extends State<StatsPage> {
+class _StatsPageState extends State<StatsPage>
+    with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> sources = [];
   late SourceModel source;
+  late AnimationController _controller;
+
   final db = FirebaseFirestore.instance;
   bool _fetchingData = false;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 120),
+    )..repeat();
     _fetchingData = true;
     // Listen to changes in the "sources" collection
     db
@@ -48,7 +55,7 @@ class _StatsPageState extends State<StatsPage> {
       final sourceNameCountMap = <String, int>{};
 
       for (var report in snapshot.docs) {
-        final sourceName = report.data()?['sourceName'] as String?;
+        final sourceName = report.data()['sourceName'] as String?;
         if (sourceName != null) {
           sourceNameCountMap[sourceName] =
               (sourceNameCountMap[sourceName] ?? 0) + 1;
@@ -56,7 +63,7 @@ class _StatsPageState extends State<StatsPage> {
       }
       sourceNameCountMap.forEach((key, value) {
         print("$value");
-        sources.forEach((e) {
+        for (var e in sources) {
           if (e["source_name"] == key) {
             db
                 .collection("sources")
@@ -65,22 +72,28 @@ class _StatsPageState extends State<StatsPage> {
                 .then((value) => print("updates complete!"))
                 .catchError((error) => print("error: $error"));
           }
-        });
+        }
       });
     });
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: MyConstants.backgroundColor,
+        backgroundColor: MyConstants.primaryColor,
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [MyConstants.backgroundColor, MyConstants.navColor],
+              colors: [MyConstants.primaryColor, MyConstants.navColor],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              stops: [0.0, 2],
+              stops: const [0.0, 5],
               tileMode: TileMode.clamp,
             ),
           ),
@@ -90,11 +103,22 @@ class _StatsPageState extends State<StatsPage> {
               SliverAppBar(
                 forceMaterialTransparency: true,
                 centerTitle: true,
-                title: Text(
-                  "#1 ${_fetchingData ? "Loading" : sources[0]["source_name"]}",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: MyConstants.textColor),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "#1 ${_fetchingData ? "Loading" : ""}",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: MyConstants.textColor),
+                    ),
+                    Text(
+                      "${_fetchingData ? "Loading" : sources[0]["source_name"]}",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red.withAlpha(255)),
+                    )
+                  ],
                 ),
                 automaticallyImplyLeading: false,
                 pinned: true,
@@ -102,26 +126,32 @@ class _StatsPageState extends State<StatsPage> {
                 // Display a placeholder widget to visualize the shrinking size.
                 flexibleSpace: Padding(
                   padding: const EdgeInsets.only(top: 30.0),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.transparent,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(40.0),
-                      child: Center(child: Pie(yourKeyValueList: sources)),
+                  child: RotationTransition(
+                    filterQuality: FilterQuality.high,
+                    turns: Tween(begin: 0.0, end: 1.0).animate(_controller),
+                    child: AnimatedContainer(
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.easeInOutCubic,
+                      decoration: const BoxDecoration(
+                        color: Colors.transparent,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Center(child: Pie(yourKeyValueList: sources)),
+                      ),
                     ),
                   ),
                 ),
                 // Make the initial height of the SliverAppBar larger than normal.
                 expandedHeight: MyConstants.screenHeight(context) / 1.5,
-                collapsedHeight: 100,
+                collapsedHeight: 300,
               ),
               // Next, create a SliverList
               SliverPadding(
                   padding: EdgeInsets.zero,
                   sliver: SliverToBoxAdapter(
                     child: Container(
-                        height: 450,
+                        height: 400,
                         decoration: BoxDecoration(
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(25),
@@ -144,7 +174,7 @@ class _StatsPageState extends State<StatsPage> {
                               Expanded(
                                 child: Column(
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       height: 50,
                                       width: MyConstants.screenWidth(context),
                                       child: Indicators(
@@ -165,10 +195,7 @@ class _StatsPageState extends State<StatsPage> {
                                                 child: ListTile(
                                                   dense: true,
                                                   leading: Container(
-                                                      decoration: BoxDecoration(
-                                                          color: MyConstants
-                                                              .primaryColor
-                                                              .withOpacity(.3),
+                                                      decoration: const BoxDecoration(
                                                           borderRadius:
                                                               BorderRadius.all(
                                                                   Radius
@@ -178,9 +205,21 @@ class _StatsPageState extends State<StatsPage> {
                                                       width: 35,
                                                       child: Center(
                                                           child: Text(
-                                                              "${index + 1}"))),
-                                                  title: Text(
-                                                      "${sources[index]["source_name"] ?? "Loading"}"),
+                                                              "#${index + 1}"))),
+                                                  title: Text(UsefulFunctions()
+                                                      .ToCamelCase(
+                                                          sources[index]
+                                                              ["source_name"])),
+                                                  subtitle: Text(
+                                                    sources[index]["status"],
+                                                    style: TextStyle(
+                                                      color: sources[index]
+                                                                  ["status"] ==
+                                                              "active"
+                                                          ? Colors.green
+                                                          : Colors.red,
+                                                    ),
+                                                  ),
                                                   trailing: Text(
                                                       "Notoriety: ${sources[index]["source_notoriety"].toStringAsFixed(0)} "),
                                                 ),

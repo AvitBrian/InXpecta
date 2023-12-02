@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:inxpecta/src/utils/constants.dart';
 
 class PieChartModel {
   final List<PieChartSectionDataModel> sections;
@@ -46,10 +47,16 @@ class PieChartSectionDataModel {
   PieChartSectionData toPieChartSectionData() {
     return PieChartSectionData(
         value: value,
-        color: color!.withAlpha(value!.toInt() * 3),
+        color: value! <= 5.0
+            ? color!.withAlpha((value!.toInt() * 20).clamp(0, 255))
+            : value! <= 10
+                ? color!.withAlpha((value!.toInt() * 20).clamp(0, 255))
+                : color!.withAlpha((value!.toInt() * 30).clamp(0, 255)),
         title: title,
         radius: radius,
-        showTitle: showTitle
+        showTitle: showTitle,
+        borderSide: BorderSide(
+            color: MyConstants.secondaryColor.withOpacity(.5), width: 3)
         // Add other properties as needed
         );
   }

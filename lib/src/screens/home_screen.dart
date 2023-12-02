@@ -1,9 +1,8 @@
-import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
 import 'package:inxpecta/src/features/home/profile_page.dart';
-import 'package:inxpecta/src/features/home/report_page.dart';
+import 'package:inxpecta/src/features/home/reports_room.dart';
 import 'package:inxpecta/src/features/home/stats_page.dart';
 import 'package:inxpecta/src/utils/constants.dart';
 import 'package:provider/provider.dart';
@@ -22,11 +21,9 @@ class _MyHomePageState extends State<MyHomePage> {
   int currentIndex = 1;
   final PageController _pageController = PageController(initialPage: 1);
 
-  final NotchBottomBarController _NotchpageController =
-      NotchBottomBarController();
   final List _pages = [
     const SizedBox(child: StatsPage()),
-    const SizedBox(child: ReportPage()),
+    const SizedBox(child: ReportRoom()),
     const SizedBox(child: ProfilePage()),
   ];
   @override
@@ -43,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
       statusBarIconBrightness: Brightness.dark,
     ));
     return Scaffold(
-      backgroundColor: MyConstants.backgroundColor,
+      backgroundColor: MyConstants.primaryColor,
       body: SafeArea(
         child: PageView.builder(
           itemCount: _pages.length,
@@ -76,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             label: "Stats",
             icon: Icon(Icons.bar_chart_outlined),

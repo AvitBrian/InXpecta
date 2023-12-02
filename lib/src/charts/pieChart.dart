@@ -5,7 +5,7 @@ import 'package:inxpecta/src/models/pie_data_model.dart';
 class Pie extends StatelessWidget {
   final List<Map<String, dynamic>> yourKeyValueList;
 
-  Pie({Key? key, required this.yourKeyValueList}) : super(key: key);
+  const Pie({super.key, required this.yourKeyValueList});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class Pie extends StatelessWidget {
 
     return PieChart(
       PieChartData(
-        sectionsSpace: 5,
+        sectionsSpace: .5,
         sections: pieChartSectionData,
         // Add other properties as needed
       ),

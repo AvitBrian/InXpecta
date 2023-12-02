@@ -19,6 +19,7 @@ class _ReportPageState extends State<ReportPage> {
   TextEditingController sourceDetailsController = TextEditingController();
   String sourceName = "";
   String sourceDetails = "";
+  late DateTime timestamp;
 
   final db = FirebaseFirestore.instance;
 
@@ -35,18 +36,22 @@ class _ReportPageState extends State<ReportPage> {
     authStateProvider = Provider.of<AuthStateProvider>(context, listen: true);
 
     Future sendReport() async {
-      sourceName = sourceNameController.text.trim();
+      sourceName = sourceNameController.text.trim().toUpperCase();
       sourceDetails = sourceDetailsController.text.trim();
+      timestamp = DateTime.now().toLocal();
       if (sourceName.isNotEmpty && sourceDetails.isNotEmpty) {
         try {
           await db.collection("reports").add({
             "sourceName": sourceName,
             "sourceDetails": sourceDetails,
+            "time": timestamp,
+            "uid": authStateProvider.uid
           });
           QuerySnapshot<Map<String, dynamic>> querySnapshot = await db
               .collection("sources")
-              .where("sourceName", isEqualTo: sourceName)
+              .where("source_name", isEqualTo: sourceName)
               .get();
+          print("THE SHIT IS: ${querySnapshot.docs.length}");
 
           // Check if there are any documents with the same sourceName
           if (querySnapshot.docs.isEmpty) {
@@ -64,59 +69,70 @@ class _ReportPageState extends State<ReportPage> {
 
           //show a success message or navigate to another screen
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Report sent successfully')),
+            const SnackBar(content: Text('Report sent successfully')),
           );
         } catch (error) {
           print('Error sending report: $error');
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fill in all fields')),
+          const SnackBar(content: Text('Please fill in all fields')),
         );
       }
     }
 
     return Scaffold(
+        appBar: AppBar(
+          backgroundColor: MyConstants.primaryColor,
+          titleTextStyle:
+              TextStyle(fontSize: 20, color: MyConstants.secondaryColor),
+          title: Text(
+            authStateProvider.name ?? "anonymous",
+          ),
+        ),
         body: Container(
           color: MyConstants.backgroundColor,
           height: MyConstants.screenHeight(context),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                Expanded(
-                    flex: 1,
-                    child: Center(
-                        child: Text(authStateProvider.name ?? "anonymous"))),
-                Expanded(
-                    child: MyTextField(
-                  hintText: "Source",
-                  controller: sourceNameController,
-                )),
-                const SizedBox(
-                  height: 1,
-                ),
-                Expanded(
-                    flex: 5,
-                    child: MyExpandableTextField(
+            child: SingleChildScrollView(
+              child: SizedBox(
+                height: MyConstants.screenHeight(context) * 0.8,
+                child: Column(
+                  children: [
+                    MyTextField(
+                      hintText: "Source",
+                      controller: sourceNameController,
+                      roundness: BorderRadius.circular(15),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Expanded(
+                        child: MyExpandableTextField(
                       hintText: "Details",
                       controller: sourceDetailsController,
                     )),
-                const SizedBox(
-                  height: 6,
+                    const SizedBox(
+                      height: 6,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: sendReport,
+          onPressed: () {
+            sendReport();
+            Navigator.pop(context);
+          },
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.circular(7), // Adjust the border radius as needed
           ),
-          label: Row(
+          label: const Row(
             children: [
               Text("Send"),
               SizedBox(

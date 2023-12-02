@@ -5,13 +5,13 @@ class MyTextField extends StatelessWidget {
   final String? hintText;
   final TextEditingController? controller;
   final bool obscureText;
-  final int? height;
+  final BorderRadius? roundness;
 
-  MyTextField({
+  const MyTextField({super.key, 
     this.hintText,
     this.controller,
     this.obscureText = false,
-    this.height,
+    this.roundness,
   });
 
   @override
@@ -25,10 +25,11 @@ class MyTextField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey[500]),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white),
-          ),
+          enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.white),
+              borderRadius: roundness ?? BorderRadius.circular(4)),
           focusedBorder: OutlineInputBorder(
+            borderRadius: roundness ?? BorderRadius.circular(4),
             borderSide: BorderSide(color: Colors.grey.shade400),
           ),
           fillColor: Colors.grey.shade200,

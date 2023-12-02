@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
 import 'package:inxpecta/src/screens/auth_screen.dart';
 import 'package:inxpecta/src/screens/home_screen.dart';
+import 'package:inxpecta/src/utils/constants.dart';
 import 'package:inxpecta/src/utils/next_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -29,8 +30,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
+    return Scaffold(
+      backgroundColor: MyConstants.primaryColor,
+      body: const Center(
         child: CircularProgressIndicator(),
       ),
     );

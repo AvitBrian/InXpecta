@@ -79,6 +79,11 @@ class _SignInFormState extends State<SignInForm>
       setState(() {
         _isLoadingGoogle = true;
       });
+      if (connP.hasInternet == false) {
+        setState(() {
+          _isLoadingGoogle = false;
+        });
+      }
       if (connP.hasInternet == true) {
         await authP.signInWithGoogle().then((value) {
           if (authP.hasError) {
@@ -93,7 +98,9 @@ class _SignInFormState extends State<SignInForm>
                         .saveDataToSharedPreferences()
                         .then((value) => authP.setAuthState())
                         .then((value) {
-                      _isLoadingGoogle = false;
+                      setState(() {
+                        _isLoadingGoogle = false;
+                      });
                       handleAfterLogin();
                     }));
               } else {
@@ -118,22 +125,45 @@ class _SignInFormState extends State<SignInForm>
     }
 
     Future handleEmailAndPasswordSignIn() async {
+      String email = emailController.value.text.trim();
+      String password = passwordController.value.text.trim();
       if (connP.hasInternet == false) {
         openSnackBar(context, "No internet :(", MyConstants.primaryColor);
+      } else if (email.isEmpty || password.isEmpty) {
+        openSnackBar(context, "Fill in your details", Colors.deepOrange);
       } else {
-        await authP
-            .signInWithEmailAndPassword(
-                emailController.text.trim(), passwordController.text.trim())
-            .then((value) {
-          if (authP.hasError) {
-            openSnackBar(context, authP.errorCode, Colors.deepOrange);
-          } else {
-            setState(() {
-              _isLoading = false;
-            });
-            handleAfterLogin();
+        try {
+          print(email);
+          await FirebaseAuth.instance
+              .signInWithEmailAndPassword(email: email, password: password);
+          print(authP.email);
+          setState(() {
+            _isLoading = false;
+          });
+
+          handleAfterLogin();
+        } on FirebaseAuthException catch (e) {
+          String errorMessage;
+
+          switch (e.code) {
+            case 'user-not-found':
+              errorMessage = 'User not found. Please check your email.';
+              break;
+            case 'wrong-password':
+              errorMessage = 'Incorrect password. Please try again.';
+              break;
+            case 'invalid-email':
+              errorMessage = 'Incorrect email. Please try again.';
+
+            default:
+              errorMessage = 'Incorrect password. Please try again.';
+              break;
           }
-        });
+          openSnackBar(context, errorMessage, Colors.deepOrange);
+        } catch (e) {
+          openSnackBar(
+              context, 'An unexpected error occurred.', Colors.deepOrange);
+        }
       }
     }
 
@@ -282,7 +312,7 @@ class _SignInFormState extends State<SignInForm>
                       ),
                       height: 70,
                       width: 70,
-                      child: Center(
+                      child: const Center(
                         child: CircularProgressIndicator(
                           color: Colors.amber,
                           strokeWidth: 5,
@@ -319,7 +349,7 @@ class _SignInFormState extends State<SignInForm>
                       ),
                       height: 70,
                       width: 70,
-                      child: Center(
+                      child: const Center(
                         child: CircularProgressIndicator(
                           color: Colors.amber,
                           strokeWidth: 5,

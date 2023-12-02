@@ -26,16 +26,18 @@ class MyExpandableTextField extends StatelessWidget {
         minLines: null,
         maxLines: null,
         expands: true,
+        keyboardType: TextInputType.multiline,
+        textCapitalization: TextCapitalization.sentences,
         textAlignVertical: TextAlignVertical.top,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey[500]),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white),
-          ),
+          enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.white),
+              borderRadius: BorderRadius.circular(15)),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey.shade400),
-          ),
+              borderSide: BorderSide(color: Colors.grey.shade400),
+              borderRadius: BorderRadius.circular(15)),
           fillColor: Colors.grey.shade200,
           filled: true,
         ),
