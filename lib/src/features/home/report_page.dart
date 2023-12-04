@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:inxpecta/src/features/authentication/components/button.dart';
 import 'package:inxpecta/src/features/authentication/components/expandable_texfield.dart';
 import 'package:inxpecta/src/features/authentication/components/textfield.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
@@ -17,6 +18,7 @@ class _ReportPageState extends State<ReportPage> {
   late AuthStateProvider authStateProvider;
   TextEditingController sourceNameController = TextEditingController();
   TextEditingController sourceDetailsController = TextEditingController();
+  bool isAnonymous = false;
   String sourceName = "";
   String sourceDetails = "";
   late DateTime timestamp;
@@ -39,13 +41,14 @@ class _ReportPageState extends State<ReportPage> {
       sourceName = sourceNameController.text.trim().toUpperCase();
       sourceDetails = sourceDetailsController.text.trim();
       timestamp = DateTime.now().toLocal();
+
       if (sourceName.isNotEmpty && sourceDetails.isNotEmpty) {
         try {
           await db.collection("reports").add({
             "sourceName": sourceName,
             "sourceDetails": sourceDetails,
             "time": timestamp,
-            "uid": authStateProvider.uid
+            "uid": isAnonymous ? null : authStateProvider.currentUser?.uid
           });
           QuerySnapshot<Map<String, dynamic>> querySnapshot = await db
               .collection("sources")
@@ -82,66 +85,82 @@ class _ReportPageState extends State<ReportPage> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: MyConstants.primaryColor,
-          titleTextStyle:
-              TextStyle(fontSize: 20, color: MyConstants.secondaryColor),
-          title: Text(
-            authStateProvider.name ?? "anonymous",
-          ),
+      appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    isAnonymous = !isAnonymous;
+                  });
+                },
+                child: Image.asset("assets/images/anonymous.png")),
+          )
+        ],
+        backgroundColor: isAnonymous
+            ? Colors.black.withOpacity(.7)
+            : MyConstants.primaryColor,
+        automaticallyImplyLeading: false,
+        titleTextStyle: TextStyle(
+            fontSize: 16,
+            color: isAnonymous ? Colors.black : MyConstants.secondaryColor),
+        title: Row(
+          children: [
+            const SizedBox(
+              width: 10,
+            ),
+            Text(
+              isAnonymous
+                  ? "Anonymous"
+                  : "Reporting as ${authStateProvider.name ?? "anonymous"}",
+            ),
+          ],
         ),
-        body: Container(
-          color: MyConstants.backgroundColor,
-          height: MyConstants.screenHeight(context),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: SingleChildScrollView(
-              child: SizedBox(
-                height: MyConstants.screenHeight(context) * 0.8,
-                child: Column(
-                  children: [
-                    MyTextField(
-                      hintText: "Source",
-                      controller: sourceNameController,
-                      roundness: BorderRadius.circular(15),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Expanded(
-                        child: MyExpandableTextField(
-                      hintText: "Details",
-                      controller: sourceDetailsController,
-                    )),
-                    const SizedBox(
-                      height: 6,
-                    ),
-                  ],
+      ),
+      body: Container(
+        color: isAnonymous
+            ? Colors.black.withOpacity(.9)
+            : MyConstants.backgroundColor,
+        height: MyConstants.screenHeight(context),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SizedBox(
+            height: MyConstants.screenHeight(context) * 0.44,
+            child: Column(
+              children: [
+                MyTextField(
+                  hintText: "Source",
+                  controller: sourceNameController,
+                  roundness: BorderRadius.circular(15),
                 ),
-              ),
+                const SizedBox(
+                  height: 5,
+                ),
+                Expanded(
+                    child: MyExpandableTextField(
+                  hintText: "Details",
+                  controller: sourceDetailsController,
+                )),
+                const SizedBox(
+                  height: 6,
+                ),
+                MyButton(
+                    backgroundColor: isAnonymous
+                        ? Colors.black.withOpacity(.7)
+                        : MyConstants.secondaryColor,
+                    color: MyConstants.primaryColor,
+                    roundness: BorderRadius.circular(15),
+                    onTap: () {
+                      sendReport();
+                      Navigator.pop(context);
+                    },
+                    label: "send")
+              ],
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            sendReport();
-            Navigator.pop(context);
-          },
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(7), // Adjust the border radius as needed
-          ),
-          label: const Row(
-            children: [
-              Text("Send"),
-              SizedBox(
-                width: 5,
-              ),
-              Icon(Icons.send_outlined)
-            ],
-          ),
-          backgroundColor: MyConstants.primaryColor,
-        ));
+      ),
+    );
   }
 }

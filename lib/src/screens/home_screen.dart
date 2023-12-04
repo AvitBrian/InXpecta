@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
-import 'package:inxpecta/src/features/home/profile_page.dart';
 import 'package:inxpecta/src/features/home/reports_room.dart';
 import 'package:inxpecta/src/features/home/stats_page.dart';
 import 'package:inxpecta/src/utils/constants.dart';
@@ -24,7 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List _pages = [
     const SizedBox(child: StatsPage()),
     const SizedBox(child: ReportRoom()),
-    const SizedBox(child: ProfilePage()),
+    // const SizedBox(child: ProfilePage()),
   ];
   @override
   void initState() {
@@ -36,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
     authStateProvider = Provider.of<AuthStateProvider>(context, listen: true);
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      systemNavigationBarColor: MyConstants.navColor,
+      systemNavigationBarColor: MyConstants.primaryColor,
       statusBarIconBrightness: Brightness.dark,
     ));
     return Scaffold(
@@ -61,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
         iconSize: 25,
         enableFeedback: true,
         elevation: 30,
-        backgroundColor: MyConstants.navColor,
+        backgroundColor: MyConstants.primaryColor,
         currentIndex: currentIndex,
         onTap: (index) {
           setState(() {
@@ -79,13 +78,13 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.bar_chart_outlined),
           ),
           BottomNavigationBarItem(
-            label: "Report",
+            label: "Reports",
             icon: Icon(Icons.data_saver_off_rounded),
           ),
-          BottomNavigationBarItem(
-            label: "Profile",
-            icon: Icon(Icons.account_circle_rounded),
-          ),
+          // BottomNavigationBarItem(
+          //   label: "Profile",
+          //   icon: Icon(Icons.account_circle_rounded),
+          // ),
         ],
       ),
     );

@@ -5,10 +5,20 @@ class MyButton extends StatelessWidget {
   final String? label;
   final double? width;
   final double? height;
+  final BorderRadius? roundness;
+  final Color? color;
+  final Color? backgroundColor;
   final Function() onTap;
 
   const MyButton(
-      {super.key, this.label, this.width, this.height, required this.onTap});
+      {super.key,
+      this.label,
+      this.backgroundColor,
+      this.width,
+      this.height,
+      this.color,
+      required this.onTap,
+      this.roundness});
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +29,13 @@ class MyButton extends StatelessWidget {
           width: width,
           padding: const EdgeInsets.all(25),
           decoration: BoxDecoration(
-              color: MyConstants.primaryColor,
-              borderRadius: BorderRadius.circular(8.0)),
+              color: backgroundColor ?? MyConstants.primaryColor,
+              borderRadius: roundness ?? BorderRadius.circular(8.0)),
           child: Center(
             child: Text(
               label!,
-              style: const TextStyle(
-                  color: Colors.black54,
+              style: TextStyle(
+                  color: color ?? Colors.black54,
                   fontWeight: FontWeight.bold,
                   fontSize: 16),
             ),

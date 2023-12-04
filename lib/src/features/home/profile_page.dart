@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:inxpecta/src/features/authentication/providers/auth_provider.dart';
 import 'package:inxpecta/src/screens/auth_screen.dart';
 import 'package:inxpecta/src/utils/constants.dart';
 import 'package:inxpecta/src/utils/next_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -15,13 +15,17 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late YoutubePlayerController _controller;
   late AuthStateProvider authStateProvider;
+  final videoUrl = "https://youtu.be/HxySrSbSY7o";
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
+    final videoId = YoutubePlayer.convertUrlToId(videoUrl);
+    _controller = YoutubePlayerController(
+        initialVideoId: videoId!,
+        flags: const YoutubePlayerFlags(autoPlay: true));
   }
 
   @override
@@ -32,23 +36,18 @@ class _ProfilePageState extends State<ProfilePage>
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: MyConstants.primaryColor,
-      systemNavigationBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ));
     authStateProvider = Provider.of<AuthStateProvider>(context, listen: true);
-
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         backgroundColor: MyConstants.primaryColor,
-        elevation: 0,
-        title: const Text(
-          'Profile',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          "My Profile",
+          style: TextStyle(fontSize: 14),
         ),
+        elevation: 0,
         actions: [
+          const Text("Log out"),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 10, 10),
             child: IconButton(
@@ -63,61 +62,84 @@ class _ProfilePageState extends State<ProfilePage>
         ],
       ),
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(0.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 80,
-                backgroundColor: Colors.grey[300],
-                child: ClipOval(
-                  child: Image.network(
-                    authStateProvider.photoUrl ??
-                        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fimages%2Fsearch%2Fblank%2520profile%2520picture%2F&psig=AOvVaw3H0NGRErZig7PEA9hE78lD&ust=1701369702394000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCOiz5pzu6YIDFQAAAAAdAAAAABAD",
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(0.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  CircleAvatar(
+                    radius: 80,
+                    backgroundColor: Colors.grey[300],
+                    child: ClipOval(
+                      child: authStateProvider.photoUrl == null ||
+                              authStateProvider.photoUrl == " "
+                          ? Image.asset("assets/images/avatar.png")
+                          : Image.network(
+                              authStateProvider.photoUrl!,
+                              errorBuilder: (BuildContext context, Object error,
+                                  StackTrace? stackTrace) {
+                                // Handle the error here
+                                return Image.asset('assets/images/avatar.png');
+                              },
+                            ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Welcome, ${authStateProvider.name}",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                authStateProvider.email ?? '',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Add functionality for editing profile
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: MyConstants.primaryColor,
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 12.0,
-                    horizontal: 16.0,
+                  const SizedBox(height: 20),
+                  Text(
+                    "Welcome, ${authStateProvider.name}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  child: Text(
-                    'Edit Profile',
-                    style: TextStyle(fontSize: 16),
+                  const SizedBox(height: 10),
+                  Text(
+                    authStateProvider.email ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Add functionality for editing profile
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: MyConstants.primaryColor,
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 12.0,
+                        horizontal: 16.0,
+                      ),
+                      child: Text(
+                        'Edit Profile',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          const SizedBox(height: 30),
+          const Text("Today's Video!"),
+          const SizedBox(height: 20),
+          Container(
+            width: MyConstants.screenWidth(context) * .9,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+            child: YoutubePlayer(
+              controller: _controller,
+              showVideoProgressIndicator: true,
+            ),
+          )
+        ],
       ),
     );
   }

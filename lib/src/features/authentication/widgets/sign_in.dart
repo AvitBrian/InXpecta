@@ -26,6 +26,7 @@ class _SignInFormState extends State<SignInForm>
   bool isLoggedIn = false;
   bool _isLoadingGoogle = false;
   bool _isLoadingFacebook = false;
+  bool _isLoginSuccessfull = false;
   bool _isLoading = false;
 
   //controllers here!
@@ -49,27 +50,6 @@ class _SignInFormState extends State<SignInForm>
     _controller.dispose();
   }
 
-  Future<void> signInWithEmailAndPassword(BuildContext context) async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      print('User signed in: ${userCredential.user?.uid}');
-      // logged in logic
-      Future.delayed(Duration.zero, () {
-        context.read<AuthStateProvider>().setAuthState();
-      });
-    } catch (e) {
-      print('Error signing in: $e');
-      // Handle the error, show a snackbar, or display an error message
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final authP = context.read<AuthStateProvider>();
@@ -85,6 +65,9 @@ class _SignInFormState extends State<SignInForm>
         });
       }
       if (connP.hasInternet == true) {
+        setState(() {
+          _isLoginSuccessfull = true;
+        });
         await authP.signInWithGoogle().then((value) {
           if (authP.hasError) {
             setState(() {
@@ -96,7 +79,7 @@ class _SignInFormState extends State<SignInForm>
               if (value == false) {
                 authP.saveDataToFireStore().then((value) => authP
                         .saveDataToSharedPreferences()
-                        .then((value) => authP.setAuthState())
+                        .then((value) => authP.setAuthState(authP.currentUser))
                         .then((value) {
                       setState(() {
                         _isLoadingGoogle = false;
@@ -104,45 +87,54 @@ class _SignInFormState extends State<SignInForm>
                       handleAfterLogin();
                     }));
               } else {
-                authP
-                    .getUserDataFromFireStore()
-                    .then((value) => authP.setAuthState().then((value) {
-                          setState(() {
-                            _isLoadingGoogle = false;
-                          });
-                          handleAfterLogin();
-                        }));
+                authP.getUserDataFromFireStore().then((value) =>
+                    authP.setAuthState(authP.currentUser).then((value) {
+                      setState(() {
+                        _isLoadingGoogle = false;
+                      });
+                      handleAfterLogin();
+                    }));
               }
             });
           }
         });
       } else {
         setState(() {
-          _isLoading = false;
+          _isLoadingGoogle = false;
         });
         openSnackBar(context, "No internet :(", MyConstants.primaryColor);
       }
     }
 
     Future handleEmailAndPasswordSignIn() async {
+      setState(() {
+        _isLoading = true;
+      });
       String email = emailController.value.text.trim();
       String password = passwordController.value.text.trim();
       if (connP.hasInternet == false) {
         openSnackBar(context, "No internet :(", MyConstants.primaryColor);
+        setState(() {
+          _isLoading = false;
+        });
       } else if (email.isEmpty || password.isEmpty) {
         openSnackBar(context, "Fill in your details", Colors.deepOrange);
+        setState(() {
+          _isLoading = false;
+        });
       } else {
         try {
           print(email);
-          await FirebaseAuth.instance
-              .signInWithEmailAndPassword(email: email, password: password);
-          print(authP.email);
+          await authP.signInWithEmailAndPassword(email, password);
+          setState(() {
+            _isLoading = false;
+          });
+          handleAfterLogin();
+        } on FirebaseAuthException catch (e) {
           setState(() {
             _isLoading = false;
           });
 
-          handleAfterLogin();
-        } on FirebaseAuthException catch (e) {
           String errorMessage;
 
           switch (e.code) {
@@ -159,10 +151,16 @@ class _SignInFormState extends State<SignInForm>
               errorMessage = 'Incorrect password. Please try again.';
               break;
           }
+          setState(() {
+            _isLoading = false;
+          });
           openSnackBar(context, errorMessage, Colors.deepOrange);
         } catch (e) {
+          setState(() {
+            _isLoading = false;
+          });
           openSnackBar(
-              context, 'An unexpected error occurred.', Colors.deepOrange);
+              context, 'An unexpected error occurred. $e', Colors.deepOrange);
         }
       }
     }
@@ -188,7 +186,7 @@ class _SignInFormState extends State<SignInForm>
               if (value == false) {
                 authP.saveDataToFireStore().then((value) => authP
                         .saveDataToSharedPreferences()
-                        .then((value) => authP.setAuthState())
+                        .then((value) => authP.setAuthState(authP.currentUser))
                         .then((value) {
                       setState(() {
                         _isLoadingFacebook = false;
@@ -196,14 +194,13 @@ class _SignInFormState extends State<SignInForm>
                       handleAfterLogin();
                     }));
               } else {
-                authP
-                    .getUserDataFromFireStore()
-                    .then((value) => authP.setAuthState().then((value) {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                          handleAfterLogin();
-                        }));
+                authP.getUserDataFromFireStore().then((value) =>
+                    authP.setAuthState(authP.currentUser).then((value) {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      handleAfterLogin();
+                    }));
               }
             });
           }
@@ -221,7 +218,9 @@ class _SignInFormState extends State<SignInForm>
               child: Lottie.asset('assets/animations/lock3.json',
                   controller: _controller, onLoaded: (composition) {
                 _controller.duration = composition.duration;
-                _controller.forward();
+                if (_isLoginSuccessfull) {
+                  _controller.forward();
+                }
               }, height: 100, animate: true, fit: BoxFit.fitWidth)),
           const SizedBox(
             height: 8,
@@ -253,10 +252,29 @@ class _SignInFormState extends State<SignInForm>
                   )),
             ],
           ),
-          MyButton(
-            label: "Sign In",
-            onTap: handleEmailAndPasswordSignIn,
-          ),
+          Stack(children: [
+            MyButton(
+              label: "Sign In",
+              onTap: handleEmailAndPasswordSignIn,
+            ),
+            Visibility(
+              visible: _isLoading,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: MyConstants.secondaryColor,
+                ),
+                height: 76,
+                width: MyConstants.screenWidth(context),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.amber,
+                    strokeWidth: 5,
+                  ),
+                ),
+              ),
+            )
+          ]),
           const SizedBox(
             height: 16,
           ),
@@ -369,6 +387,6 @@ class _SignInFormState extends State<SignInForm>
 
   handleAfterLogin() {
     Future.delayed(const Duration(milliseconds: 1000))
-        .then((value) => {nextScreen(context, const MyHomePage())});
+        .then((value) => {nextScreenReplacement(context, const MyHomePage())});
   }
 }

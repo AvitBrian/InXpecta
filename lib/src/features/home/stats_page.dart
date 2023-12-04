@@ -62,15 +62,13 @@ class _StatsPageState extends State<StatsPage>
         }
       }
       sourceNameCountMap.forEach((key, value) {
-        print("$value");
         for (var e in sources) {
           if (e["source_name"] == key) {
             db
                 .collection("sources")
                 .doc(e["id"])
-                .update({"source_notoriety": value})
-                .then((value) => print("updates complete!"))
-                .catchError((error) => print("error: $error"));
+                .update({"source_notoriety": value}).catchError(
+                    (error) => throw (error));
           }
         }
       });
@@ -102,23 +100,28 @@ class _StatsPageState extends State<StatsPage>
               // Add the app bar to the CustomScrollView.
               SliverAppBar(
                 forceMaterialTransparency: true,
-                centerTitle: true,
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "#1 ${_fetchingData ? "Loading" : ""}",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: MyConstants.textColor),
-                    ),
-                    Text(
-                      "${_fetchingData ? "Loading" : sources[0]["source_name"]}",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red.withAlpha(255)),
-                    )
-                  ],
+                centerTitle: false,
+                title: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        "#1 ${_fetchingData ? "Loading" : ""}",
+                        style: TextStyle(
+                            fontSize: 45,
+                            fontWeight: FontWeight.bold,
+                            color: MyConstants.secondaryColor),
+                      ),
+                      Text(
+                        "${_fetchingData ? "Loading" : sources[0]["source_name"]}",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepOrange,
+                            fontSize: 25),
+                      )
+                    ],
+                  ),
                 ),
                 automaticallyImplyLeading: false,
                 pinned: true,

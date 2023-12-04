@@ -16,7 +16,7 @@ class MyContainer extends StatelessWidget {
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color, width: 2),
-          color: MyConstants.secondaryColor),
+          color: MyConstants.navColor),
       child: Image.asset(
         image!,
         height: height,

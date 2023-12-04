@@ -26,7 +26,7 @@ class AuthStateProvider extends ChangeNotifier {
   //usercredentials
   String? _email;
   String? _name;
-  String? _photoUrl;
+  String? _photoUrl = "";
   String? _uid;
 
   //Getters here!
@@ -46,16 +46,32 @@ class AuthStateProvider extends ChangeNotifier {
     // checkAuthState();
   }
 
-  Future checkAuthState() async {
-    final SharedPreferences s = await SharedPreferences.getInstance();
-    _isLoggedIn = s.getBool("signed_in") ?? false;
+  Future<void> checkAuthState() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        _currentUser = user;
+        _email = _currentUser!.email;
+        _name = _currentUser!.displayName;
+        _photoUrl = _currentUser!.photoURL;
+        _uid = _currentUser!.uid;
+      }
+      _isLoggedIn = user != null;
+    } catch (e) {
+      _isLoggedIn = false;
+      throw ('Error checking authentication state: $e');
+    }
+
     notifyListeners();
   }
 
-  Future setAuthState() async {
+  Future setAuthState(user) async {
     _isLoggedIn = true;
-    final SharedPreferences s = await SharedPreferences.getInstance();
-    s.setBool("signed_in", true);
+    _currentUser = user;
+    _email = _currentUser!.email;
+    _name = _currentUser!.displayName;
+    _photoUrl = _currentUser!.photoURL;
+    _uid = _currentUser!.uid;
     notifyListeners();
   }
 
@@ -70,6 +86,47 @@ class AuthStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> signUp(userEmail, userPassword, userName) async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+              email: userEmail, password: userPassword);
+
+      await userCredential.user?.updateDisplayName(userName);
+      await userCredential.user?.reload();
+      _currentUser = FirebaseAuth.instance.currentUser;
+
+      _email = _currentUser!.email;
+      _name = _currentUser?.displayName;
+      _photoUrl = _currentUser!.photoURL!;
+      _uid = _currentUser!.uid;
+      setAuthState(_currentUser);
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case "invalid-email":
+          _hasError = true;
+          _errorCode = e.message;
+          break;
+        case "account-exists-with-different-credentials":
+          _errorCode = "Account already Exists";
+          _hasError = true;
+          notifyListeners();
+          break;
+        case "null":
+          _hasError = true;
+          _errorCode = "unexpected Error please try again later";
+          notifyListeners();
+          break;
+        default:
+          _errorCode = e.message;
+          _hasError = true;
+          notifyListeners();
+          break;
+      }
+    }
+  }
+
   Future<void> signInWithEmailAndPassword(userEmail, userPassword) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -77,12 +134,11 @@ class AuthStateProvider extends ChangeNotifier {
         password: userPassword,
       );
 
-      _currentUser = userCredential.user;
+      _currentUser = FirebaseAuth.instance.currentUser;
       _email = _currentUser!.email;
       _name = _currentUser!.displayName;
       _photoUrl = _currentUser!.photoURL;
       _uid = _currentUser!.uid;
-      setAuthState();
       notifyListeners();
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
@@ -138,14 +194,16 @@ class AuthStateProvider extends ChangeNotifier {
         // Once signed in, return the UserCredential here
         // UserCredential userCredential =
         //     await _auth.signInWithCredential(credential);
-        User userDetails = (await _auth.signInWithCredential(credential)).user!;
+        User userDetails =
+            (await FirebaseAuth.instance.signInWithCredential(credential))
+                .user!;
+        _currentUser = userDetails;
 
-        _email = userDetails.email;
-        _name = userDetails.displayName;
-        _photoUrl = userDetails.photoURL;
-        _uid = userDetails.uid;
+        _email = _currentUser?.email;
+        _name = _currentUser?.displayName;
+        _photoUrl = _currentUser?.photoURL!;
+        _uid = _currentUser?.uid;
         _hasError = false;
-        setAuthState();
         notifyListeners();
       } on FirebaseAuthException catch (e) {
         switch (e.code) {
@@ -193,12 +251,15 @@ class AuthStateProvider extends ChangeNotifier {
               FacebookAuthProvider.credential(loginResult.accessToken!.token);
 
           // Once signed in, return the UserCredential
-          await _auth.signInWithCredential(facebookAuthCredential);
-          _email = profileEmail;
-          _name = profileName;
-          _photoUrl = profilePicUrl;
-          _uid = profileId;
-          setAuthState();
+          await FirebaseAuth.instance
+              .signInWithCredential(facebookAuthCredential);
+          _currentUser = FirebaseAuth.instance.currentUser;
+
+          _email = _currentUser?.email;
+          _name = _currentUser?.displayName;
+          _photoUrl = _currentUser?.photoURL;
+          _uid = _currentUser?.uid;
+
           notifyListeners();
         } on FirebaseAuthException catch (e) {
           _hasError = true;
@@ -243,12 +304,24 @@ class AuthStateProvider extends ChangeNotifier {
     });
   }
 
-  Future saveDataToSharedPreferences() async {
+  Future<void> saveDataToSharedPreferences() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
-    await s.setString("name", _name!);
-    await s.setString("email", _email!);
-    await s.setString("uid", _uid!);
-    // await s.setString("photoURL", _photoUrl);
+
+    if (_name != null) {
+      await s.setString("name", _name!);
+    }
+
+    if (_email != null) {
+      await s.setString("email", _email!);
+    }
+
+    if (_uid != null) {
+      await s.setString("id", _uid!);
+    }
+
+    if (_photoUrl != null) {
+      await s.setString("photoURL", _photoUrl!);
+    }
   }
 
   Future<void> signOut() async {

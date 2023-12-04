@@ -26,7 +26,7 @@ class Indicators extends StatelessWidget {
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
-                      color: e.color, borderRadius: BorderRadius.circular(10)),
+                      color: e.color, borderRadius: BorderRadius.circular(15)),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(e.title),
