@@ -1,11 +1,11 @@
 # inxpecta
+## Prelude
+InXpecta encompasses a comprehensive web application specifically designed to address the issue of online content ambiguity. It provides features aimed at enhancing digital literacy and fact-checking capabilities among users, effectively reducing the distribution and consumption of unreliable information.
 
-A new Flutter project.
+##  instructions
+To download the latest version of the app click here: [Download](https://github.com/AvitBrian/InXpecta/blob/main/build/app/outputs/flutter-apk/app-release.apk)
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
+To build your own version just type: flutter build in the terminal, after cloning the repo.
 A few resources to get you started if this is your first Flutter project:
 
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
